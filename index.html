@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <title>Sagar Rajput | Name Rain</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    body {
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="rain"></canvas>
+
+  <script>
+    const canvas = document.getElementById("rain");
+    const ctx = canvas.getContext("2d");
+
+    const name = "Sagar Rajput";
+    const gap = 180;
+
+    let width = 0;
+    let height = 0;
+    let drops = [];
+    let animationId;
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      width = window.innerWidth;
+      height = window.innerHeight;
+
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, width, height);
+
+      const count = Math.ceil(width / gap) + 2;
+
+      drops = Array.from({ length: count }, (_, i) => ({
+        x: i * gap + Math.random() * 45,
+        y: Math.random() * height * 1.5 - height,
+        speed: 1.2 + Math.random() * 3.8,
+        size: 14 + Math.random() * 8,
+        glow: Math.random() > 0.5
+      }));
+    }
+
+    function animate() {
+      // Creates the fading Matrix trail.
+      ctx.fillStyle = "rgba(0, 0, 0, 0.12)";
+      ctx.fillRect(0, 0, width, height);
+
+      for (const drop of drops) {
+        ctx.font = `bold ${drop.size}px Consolas, monospace`;
+        ctx.textBaseline = "top";
+
+        ctx.fillStyle = drop.glow ? "#baffc5" : "#00ff41";
+        ctx.shadowColor = "#00ff41";
+        ctx.shadowBlur = drop.glow ? 18 : 10;
+
+        ctx.fillText(name, drop.x, drop.y);
+
+        drop.y += drop.speed;
+
+        // Reset each drop so the rain continues forever.
+        if (drop.y > height + 40) {
+          drop.y = -30 - Math.random() * height * 0.6;
+          drop.speed = 1.2 + Math.random() * 3.8;
+          drop.glow = Math.random() > 0.5;
+        }
+      }
+
+      ctx.shadowBlur = 0;
+      animationId = requestAnimationFrame(animate);
+    }
+
+    window.addEventListener("resize", resize);
+
+    resize();
+    animate();
+  </script>
+</body>
+</html>
