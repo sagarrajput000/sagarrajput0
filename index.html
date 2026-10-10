@@ -23,6 +23,7 @@
 
     body {
       font-family: Consolas, "Courier New", monospace;
+      touch-action: manipulation;
     }
 
     canvas {
@@ -30,6 +31,8 @@
       width: 100%;
       height: 100%;
       background: #000;
+      cursor: crosshair;
+      touch-action: manipulation;
     }
   </style>
 </head>
@@ -43,11 +46,12 @@
 
     const name = "Sagar Rajput";
     const gap = 180;
+    const MAX_TAP_DROPS = 300;
 
     let width = 0;
     let height = 0;
     let drops = [];
-    let animationId;
+    let tapDrops = [];
 
     function resize() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -59,8 +63,6 @@
       canvas.height = Math.round(height * dpr);
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, width, height);
 
       const count = Math.ceil(width / gap) + 2;
 
@@ -73,24 +75,46 @@
       }));
     }
 
+    // Spawn a new name wherever the screen is tapped or clicked.
+    canvas.addEventListener("pointerdown", (event) => {
+      const rect = canvas.getBoundingClientRect();
+
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      // Keep the number of extra falling names under control.
+      if (tapDrops.length >= MAX_TAP_DROPS) {
+        tapDrops.shift();
+      }
+
+      tapDrops.push({
+        x,
+        y,
+        speed: 2 + Math.random() * 3,
+        size: 20,
+        glow: true
+      });
+    });
+
+    function drawDrop(drop) {
+      ctx.font = `bold ${drop.size}px Consolas, monospace`;
+      ctx.textBaseline = "top";
+      ctx.fillStyle = drop.glow ? "#baffc5" : "#00ff41";
+      ctx.shadowColor = "#00ff41";
+      ctx.shadowBlur = drop.glow ? 18 : 10;
+      ctx.fillText(name, drop.x, drop.y);
+    }
+
     function animate() {
-      // Creates the fading Matrix trail.
+      // Fade old frames to create the Matrix trail.
       ctx.fillStyle = "rgba(0, 0, 0, 0.12)";
       ctx.fillRect(0, 0, width, height);
 
+      // Continuous background rain.
       for (const drop of drops) {
-        ctx.font = `bold ${drop.size}px Consolas, monospace`;
-        ctx.textBaseline = "top";
-
-        ctx.fillStyle = drop.glow ? "#baffc5" : "#00ff41";
-        ctx.shadowColor = "#00ff41";
-        ctx.shadowBlur = drop.glow ? 18 : 10;
-
-        ctx.fillText(name, drop.x, drop.y);
-
+        drawDrop(drop);
         drop.y += drop.speed;
 
-        // Reset each drop so the rain continues forever.
         if (drop.y > height + 40) {
           drop.y = -30 - Math.random() * height * 0.6;
           drop.speed = 1.2 + Math.random() * 3.8;
@@ -98,8 +122,21 @@
         }
       }
 
+      // Names spawned by taps and clicks.
+      for (let i = tapDrops.length - 1; i >= 0; i--) {
+        const drop = tapDrops[i];
+
+        drawDrop(drop);
+        drop.y += drop.speed;
+
+        // Remove a spawned name after it leaves the screen.
+        if (drop.y > height + 40) {
+          tapDrops.splice(i, 1);
+        }
+      }
+
       ctx.shadowBlur = 0;
-      animationId = requestAnimationFrame(animate);
+      requestAnimationFrame(animate);
     }
 
     window.addEventListener("resize", resize);
