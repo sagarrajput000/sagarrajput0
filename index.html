@@ -33,11 +33,37 @@
       cursor: crosshair;
       touch-action: manipulation;
     }
+
+    .corner-link {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 20;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(0, 255, 65, 0.1);
+      border: 1px solid rgba(0, 255, 65, 0.5);
+      color: #baffc5;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      box-shadow: 0 0 16px rgba(0, 255, 65, 0.25);
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .corner-link:hover {
+      background: rgba(0, 255, 65, 0.18);
+      transform: translateY(-1px);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.35);
+    }
   </style>
 </head>
 
 <body>
   <canvas id="rain"></canvas>
+  <a class="corner-link" href="https://site-03cce45ce65d4f56a38d99c1d8bf1e17.freebuff.page/students" target="_blank" rel="noreferrer">Students</a>
 
   <script>
     const canvas = document.getElementById("rain");
